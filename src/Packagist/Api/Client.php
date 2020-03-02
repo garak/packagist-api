@@ -2,9 +2,10 @@
 
 namespace Packagist\Api;
 
-use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\ClientInterface;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\Psr17FactoryDiscovery;
 use Packagist\Api\Result\Factory;
+use Psr\Http\Client\ClientInterface;
 
 /**
  * Packagist Api
@@ -194,11 +195,12 @@ class Client
     protected function request($url)
     {
         if (null === $this->httpClient) {
-            $this->httpClient = new HttpClient();
+            $this->httpClient = HttpClientDiscovery::find();
         }
+        $request = Psr17FactoryDiscovery::findRequestFactory()->createRequest('get', $url);
 
         return $this->httpClient
-            ->request('get', $url)
+            ->sendRequest($request)
             ->getBody();
     }
 
